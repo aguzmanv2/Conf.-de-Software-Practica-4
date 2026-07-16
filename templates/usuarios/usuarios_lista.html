@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Gestionar Usuarios{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>Gestionar Usuarios</h1>
+        {% if enable_reports %}
+            <a href="{% url 'exportar_usuarios' %}" class="btn btn-success">Exportar CSV</a>
+        {% endif %}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{ usuario.get_full_name|default:"Sin nombre" }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>
+                    <form method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <select name="rol_{{ usuario.id }}" onchange="this.form.submit()">
+                            {% for grupo in grupos %}
+                                <option value="{{ grupo.id }}" {% if usuario.groups.all.0.name == grupo.name %}selected{% endif %}>
+                                    {{ grupo.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </td>
+                <td>
+                    <div class="actions">
+                        <a href="{% url 'editar_usuario' usuario.id %}" class="btn btn-primary btn-sm">Editar</a>
+                        <a href="{% url 'eliminar_usuario' usuario.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: #999;">No hay usuarios registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
